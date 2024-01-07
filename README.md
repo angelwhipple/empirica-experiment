@@ -6,6 +6,6 @@
 - cd ../server && npm install
 
 # play experiment
-cd empirica-experiment && empirica
+- cd empirica-experiment && empirica
 - Launch games from http://localhost:3000/admin
 - Play games as producers from http://localhost:3000

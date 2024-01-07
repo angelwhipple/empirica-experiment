@@ -1,8 +1,11 @@
-# empirica-dev
-Empirica Development Repository for Experimentation.
+# setup
+- git clone \<repo-url\> && cd empirica-experiment
 
-For installation instructions, check out [this Google Document](https://docs.google.com/document/d/1h0MvtqK9ss_Yw3fcofB_j0B_T7V7GodYdjEjKUqiPws/edit?usp=sharing).
+- cd client && npm install
 
-For issues to start contributing to, take a look at the open [Issues](https://github.com/Digital-Information-Research-Lab/empirica-dev/issues).
+- cd ../server && npm install
 
-For details on our progress, check out the [Experiment Roadmap](https://github.com/orgs/Digital-Information-Research-Lab/projects/2) (you will need access if you can't view this, since it's private. Ping [SwapneelM](https://github.com/swapneelm))
+# play experiment
+- cd empirica-experiment && empirica
+- Launch games from http://localhost:3000/admin
+- Play games as producers from http://localhost:3000

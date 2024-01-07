@@ -1,11 +1,23 @@
-# setup
+# Setup
+
 - git clone \<repo-url\> && cd empirica-experiment
 
 - cd client && npm install
 
 - cd ../server && npm install
 
-# play experiment
+# Play experiment
+
 - cd empirica-experiment && empirica
-- Launch games from http://localhost:3000/admin
-- Play games as producers from http://localhost:3000
+- Launch a new game from http://localhost:3000/admin:
+  - Click New Batch, use the following params
+  - Assignment method: Complete
+  - Treatment: Solo
+  - Lobby configuration: Default individual
+- Navigate to http://localhost:3000 to play as a producer
+
+# Short answers
+
+1. Feature planning
+
+2. Real-world applications

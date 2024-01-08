@@ -14,15 +14,15 @@ export function Advertisement({ roundNumber }) {
   const player = usePlayer();
   const players = usePlayers();
   const stage = useStage();
-  const roundNumberText = "round" + roundNumber;
-  //console.log('roundNumberText', roundNumberText);
+
   function handleChange() {
-    console.log("something happened");
+    console.log("Something happened");
   }
   function handleSubmit() {
     console.log("Player.stage set to true");
 
-    player.set(roundNumberText.concat("_choices"), [
+    const roundKey = `ROUND_${roundNumber}_CHOICES`;
+    player.set(roundKey, [
       player.round.get("productionQuality"),
       player.round.get("advertisementQuality"),
       player.round.get("priceOfProduct"),

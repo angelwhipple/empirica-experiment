@@ -2,142 +2,177 @@ import React, { useEffect, useState } from "react";
 import { Button } from "../components/Button";
 import { usePlayer } from "@empirica/core/player/classic/react";
 import { useRef } from "react";
+import { get, post } from "../../util";
+import "./Warrant.css";
+import Leaderboard from "./Leaderboard";
 
 export function SalesResults({ roundNumber }) {
-  console.log("calculating advertiser score");
+  useEffect(() => {
+    console.log(
+      `Calculating round score for: ${player.get("participantIdentifier")}`
+    );
+    calculateScore();
+  }, []);
+
   const player = usePlayer();
-  const roundNumberText = "round" + roundNumber;
+  const [leaderboard, setLeaderboard] = useState(false);
+  const [results, setResults] = useState();
 
-  //const adQuality = player.get("adQuality");
-  const productionQuality = player.get(roundNumberText.concat("_choices"))[0];
-  const advertisementQuality = player.get(
-    roundNumberText.concat("_choices")
-  )[1];
-  const priceOfProduct = player.get(roundNumberText.concat("_choices"))[2];
-  const productionCost = player.get(roundNumberText.concat("_choices"))[3];
-  let imageUrl = "";
-  //console.log('roundNumberText', roundNumberText)
-  if (advertisementQuality === "high") {
-    imageUrl = "/images/toothpaseamazing.jpg"; // Replace with the actual URL for high quality
-  } else if (advertisementQuality === "low") {
-    imageUrl = "/images/toothpastestandard.jpg"; // Replace with the actual URL for low quality
-  }
+  const roundKey = `ROUND_${roundNumber}_CHOICES`;
+  const roundChoices = player.get(roundKey);
+  const productionQuality = roundChoices[0];
+  const advertisementQuality = roundChoices[1];
+  const priceOfProduct = roundChoices[2];
+  const productionCost = roundChoices[3];
+  const warrant = roundChoices[4];
 
-  const currentScore = player.get("score") || 0; // , adQuality, points, salesCount, numBuyers
-
-  const warrant = player.get(roundNumberText.concat("_choices"))[4];
-
-  const penalty = priceOfProduct * 0.5;
-  const insurance = priceOfProduct * 0.1;
   const audience = warrant ? 1000 : 100;
-
-  let points = priceOfProduct;
-
-  const min = 0.1 * audience;
-  const max = 0.9 * audience;
-
-  //  switch (advertisementQuality){
-  //    case "high":
-  //      switch (priceOfProduct) {case "high": min = 50; break; case "low": min = 70; break;
-  //      };
-  //    case "low":
-  //      switch (priceOfProduct) {case "high": min =10, max=20; break; case "low": min = 50, max = 80; break;}
-  //  }
-  const numBuyers = Math.floor(Math.random() * (max - min) + min);
-
-  const minClaims = 0.1 * numBuyers;
-  const maxClaims = 0.5 * numBuyers;
-  const claims = Math.floor(
-    Math.random() * (maxClaims - minClaims) + minClaims
-  );
-  const insurancePoints = claims * insurance;
-  const penaltyPoints = claims * penalty;
   const goodAd = productionQuality === advertisementQuality;
+  const imageUrl =
+    advertisementQuality === "high"
+      ? "/images/toothpaseamazing.jpg"
+      : "/images/toothpastestandard.jpg";
 
-  const warrantPoints =
-    warrant && goodAd
-      ? insurancePoints
-      : warrant && !goodAd
-      ? -penaltyPoints
-      : 0;
+  const calculateScore = () => {
+    const currentScore = player.get("score") || 0;
 
-  const salesCount = numBuyers * (priceOfProduct - productionCost);
-  const roundScore = salesCount + warrantPoints;
-  const finalScore = currentScore + roundScore;
+    const min = 0.1 * audience;
+    const max = 0.9 * audience;
+    const numBuyers = Math.floor(Math.random() * (max - min) + min);
+
+    const minClaims = 0.1 * numBuyers;
+    const maxClaims = 0.5 * numBuyers;
+    const claims = Math.floor(
+      Math.random() * (maxClaims - minClaims) + minClaims
+    );
+
+    const penalty = priceOfProduct * 0.5;
+    const insurance = priceOfProduct * 0.1;
+    const insurancePoints = claims * insurance;
+    const penaltyPoints = claims * penalty;
+    const warrantPoints =
+      warrant && goodAd
+        ? insurancePoints
+        : warrant && !goodAd
+        ? -penaltyPoints
+        : 0;
+
+    const salesCount = numBuyers * (priceOfProduct - productionCost);
+    const roundScore = salesCount + warrantPoints;
+    const finalScore = currentScore + roundScore;
+    setResults({
+      salesCount: salesCount,
+      buyers: numBuyers,
+      claims: claims,
+      penalty: penalty,
+      insurance: insurance,
+      penaltyPoints: penaltyPoints,
+      insurancePoints: insurancePoints,
+      roundScore: roundScore,
+      finalScore: finalScore,
+    });
+  };
+
+  useEffect(() => {
+    if (results) {
+      post("/leaderboard/update", {
+        identifier: player.get("participantIdentifier"),
+        score: results.finalScore,
+      }).then((res) => console.log(`Leaderboard updated`));
+    }
+  }, [results]);
 
   function handleSubmit() {
-    console.log("Moving on from results round");
+    console.log("Next round");
     player.stage.set("submit", true);
-    player.set("score", finalScore);
+    player.set("score", results.finalScore);
   }
 
   return (
-    <div className="mt-3 sm:mt-5 p-20">
-      <h1 className="text-lg leading-6 font-medium text-gray-900">Sales</h1>
-      <div className="text-lg mt-2 mb-6">
-        {/* <p className="text-sm text-gray-500"> */}
-        <p>
-          You chose to produce a <b>{productionQuality}</b> quality product.
-        </p>
-        <p>
-          You chose to advertise it as a <b>{advertisementQuality}</b> quality
-          product. You sold it at a price of <b>${priceOfProduct}</b>.
-          <br /> <br />
-        </p>
-
-        <img
-          src={imageUrl}
-          alt="Toothpaste Standard"
-          width="250"
-          height="250"
-        />
-
-        <p>
-          It was advertised to an audience of {audience} users, and {numBuyers}{" "}
-          users bought your product.
-        </p>
-
-        <p>
-          You earned ${priceOfProduct - productionCost} per product x{" "}
-          {numBuyers} units sold = {salesCount} points in sales.
-        </p>
-
-        {warrant ? (
-          <>
-            <br></br>
+    <>
+      {leaderboard ? (
+        <Leaderboard setLeaderboard={setLeaderboard}></Leaderboard>
+      ) : (
+        <></>
+      )}
+      {results ? (
+        <div className="mt-3 sm:mt-5 p-20">
+          <h1 className="text-lg leading-6 font-medium text-gray-900">Sales</h1>
+          <div className="text-lg mt-2 mb-6">
             <p>
-              Of those {numBuyers} customers, {claims} of them challenged your
-              ad warranty with false advertising claims.
+              You chose to produce a <b>{productionQuality}</b> quality product.
             </p>
-            {goodAd ? (
-              <p>
-                Luckily, your product was sold as advertised. You gain an
-                additional ${insurance} in insurance x {claims} customers ={" "}
-                {insurancePoints} points.
-              </p>
+            <p>
+              You chose to advertise it as a <b>{advertisementQuality}</b>{" "}
+              quality product. You sold it at a price of{" "}
+              <b>${priceOfProduct}</b>.
+              <br /> <br />
+            </p>
+
+            <img
+              src={imageUrl}
+              alt="Toothpaste Standard"
+              width="250"
+              height="250"
+            />
+
+            <p>
+              It was advertised to an audience of {audience} users, and{" "}
+              {results.buyers} users bought your product.
+            </p>
+
+            <p>
+              You earned ${priceOfProduct - productionCost} per product x{" "}
+              {results.buyers} units sold = {results.salesCount} points in
+              sales.
+            </p>
+
+            {warrant ? (
+              <>
+                <br></br>
+                <p>
+                  Of those {results.buyers} customers, {results.claims} of them
+                  challenged your ad warranty with false advertising claims.
+                </p>
+                {goodAd ? (
+                  <p>
+                    Luckily, your product was sold as advertised. You gain an
+                    additional ${results.insurance} in insurance x{" "}
+                    {results.claims} customers = {results.insurancePoints}{" "}
+                    points.
+                  </p>
+                ) : (
+                  <p>
+                    Unfortunately, you falsely advertised your product. You lose
+                    ${results.penalty} in fees x {results.claims} customers = -
+                    {results.penaltyPoints} points.
+                  </p>
+                )}
+              </>
             ) : (
-              <p>
-                Unfortunately, you falsely advertised your product. You lose $
-                {penalty} in fees x {claims} customers = -{penaltyPoints}{" "}
-                points.
-              </p>
+              <></>
             )}
-          </>
-        ) : (
-          <></>
-        )}
-        <br />
-        <p> Your score for this round is: {roundScore} </p>
-        <p> Your total score is: {finalScore} </p>
-        <br />
-        <p>
-          Click to proceed to the next round to sell products in this
-          marketplace.
-        </p>
-      </div>
-      <Button handleClick={handleSubmit} primary>
-        I'm done!
-      </Button>
-    </div>
+            <br />
+            <p> Your score for this round is: {results.roundScore} </p>
+            <p> Your total score is: {results.finalScore} </p>
+            <br />
+            <p>
+              Click to proceed to the next round to sell products in this
+              marketplace.
+            </p>
+          </div>
+          <div className="horizontal-flex">
+            <Button handleClick={handleSubmit} primary>
+              I'm done!
+            </Button>
+            <Button handleClick={() => setLeaderboard(true)}>
+              View leaderboard
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <></>
+      )}
+    </>
   );
 }

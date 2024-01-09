@@ -77,7 +77,7 @@ export function SalesResults({ roundNumber }) {
     if (results) {
       post("/leaderboard/update", {
         identifier: player.get("participantIdentifier"),
-        score: results.finalScore,
+        score: results.roundScore,
       }).then((res) => console.log(`Leaderboard updated`));
     }
   }, [results]);

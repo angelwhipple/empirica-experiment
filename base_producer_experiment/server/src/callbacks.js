@@ -41,7 +41,7 @@ app.get("/leaderboard", (req, res) => {
 app.post("/leaderboard/update", (req, res) => {
   Score.findOneAndUpdate(
     { identifier: req.body.identifier },
-    { score: req.body.score },
+    { $inc: { score: req.body.score } },
     { upsert: true, new: true }
   ).then((updatedScore) => {
     res.send({ score: updatedScore });

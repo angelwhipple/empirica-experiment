@@ -42,7 +42,7 @@ const Leaderboard = (props) => {
       <div className="modal-container">
         <div className="modal-content">
           <p>
-            <strong>Producer Leaderboard</strong>
+            <strong>Market Leaderboard</strong>
           </p>
           <div className="score-display">{scores}</div>
           <Button handleClick={() => props.setLeaderboard(false)}>

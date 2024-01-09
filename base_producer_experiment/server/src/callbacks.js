@@ -55,7 +55,7 @@ app.listen(3001, () => {
 const initLeaderboard = async () => {
   Score.find().then(async (scores) => {
     if (scores.length === 0) {
-      const newScore = new Score({ identifier: "Dummy user", score: 1000 });
+      const newScore = new Score({ identifier: "Amazon", score: 1000 });
       await newScore.save();
     }
     console.log(`Leaderboard initialized`);

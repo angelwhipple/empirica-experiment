@@ -1,4 +1,7 @@
 # Intro
+This project extends a web-based game experiment developed by the MIT Initiative on the Digital Economy. The game simulates a digital marketplace where players take on the roles of producers and consumers of information in an environment saturated with misinformation.
+
+The experiment is designed to study how generative AI technologies impact the spread of information and decision-making in low-trust settings. Players strategically produce/consume content, with scoring tied to credibility, influence, and trust.
 
 The majority of this Empirica experiment has been contributed by @SwapneelM and the Digital Information Research Lab at Boston University. My contributions include:
 
